@@ -97,7 +97,8 @@ class QuantificationKitModel:
         measure(port, led_power, known_concentration, sample_input): Performs a measurement using the fluorometer.
     """
 
-    def __init__(self, quantification_kit):
+    def __init__(self, port, quantification_kit):
+        self.fluorometer = Fluorometer(port=port)
         self.quantification_kit = quantification_kit
         self.units = self.quantification_kit.units
         self.standard_measurements = []
@@ -140,12 +141,11 @@ class QuantificationKitModel:
             ret += f"{sc},{m},{tc},{df}\n"
         return ret
     
-    def measure(self, port, led_power, known_concentration, sample_input):
+    def measure(self, led_power, known_concentration, sample_input):
         """
         Measures the sample concentration using the fluorometer.
 
         Args:
-            port (str): The serial port connected to the fluorometer.
             led_power (float): Unused.
             known_concentration (float): Unused.
             sample_input (float): The initial volume of the sample.
@@ -157,8 +157,8 @@ class QuantificationKitModel:
             Exception: If the measurement fails.
         """
         try:
-            with Fluorometer(port=port) as f:
-                measurement = f.read(self.quantification_kit.led_power)
+            with self.fluorometer:
+                measurement = self.fluorometer.read(self.quantification_kit.led_power)
                 self.error = False
         except Exception as e:
             self.error = True
@@ -202,7 +202,8 @@ class FluorometerModel:
 
     """
 
-    def __init__(self):
+    def __init__(self, port):
+        self.fluorometer = Fluorometer(port=port)
         self.units = "arb."
         self.standard_measurements = []
         self.standard_concentrations = []
@@ -229,12 +230,11 @@ class FluorometerModel:
             ret += f"{tc},{m}\n"
         return ret
     
-    def measure(self, port, led_power, known_concentration, sample_input):
+    def measure(self, led_power, known_concentration, sample_input):
         """
         Measures the sample fluorescence using the fluorometer.
 
         Args:
-            port (str): The serial port connected to the fluorometer.
             led_power (float): Power output of the LED to use during measurement (arb %).
             known_concentration (float): The known concentration of the sample.
             sample_input (float): Unused.
@@ -246,8 +246,8 @@ class FluorometerModel:
             Exception: If the measurement fails.
         """
         try:
-            with Fluorometer(port=port) as f:
-                measurement = f.read(led_power)
+            with self.fluorometer:
+                measurement = self.fluorometer.read(led_power)
                 self.error = False
         except Exception as e:
             self.error = True
@@ -271,7 +271,7 @@ class FluorometerUI(tk.Tk):
         self.title("DIYNAFLUOR Fluorometer")
         # Add explicit quit handler, since on some systems the window close button doesn't work
         self.protocol("WM_DELETE_WINDOW", self._quit)
-        self.model = QuantificationKitModel(quantification_kits[0])
+        self.model = QuantificationKitModel(Fluorometer.DEMO_PORT, quantification_kits[0])
         self.have_unsaved_measurements = False
         self.create_widgets()
         self.refresh_com_ports()
@@ -359,9 +359,9 @@ class FluorometerUI(tk.Tk):
                 self._do_save()
 
         if self.mode.get() == self._FLUOROMETER_MODE:
-            self.model = FluorometerModel()
+            self.model = FluorometerModel(self.selected_com_port.get())
         else:
-            self.model = QuantificationKitModel(quantification_kits[self.mode.get()])
+            self.model = QuantificationKitModel(self.selected_com_port.get(), quantification_kits[self.mode.get()])
         self.have_unsaved_measurements = False
         self.measure_button.config(state='enabled')
         self.sync_model()
@@ -388,7 +388,6 @@ class FluorometerUI(tk.Tk):
     def _measure_thread(self):
         try:
             self.model.measure(
-                port=self.selected_com_port.get(),
                 led_power=self.led_power.get(),
                 known_concentration=self.known_concentration.get(),
                 sample_input=self.sample_input.get()
