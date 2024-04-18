@@ -241,31 +241,29 @@ class FluorometerUI(tk.Tk):
         self.quit()
         self.destroy()
 
-    def _validate_float(self, value_if_allowed):
-        if value_if_allowed == '':
-            return True
-        try:
-            _ = float(value_if_allowed)
-            return True
-        except ValueError:
-            return False
-        
-    def _clamp_led_power(self, *args):
-        try:
-            led_power = self.led_power.get()
-        except tk.TclError:
-            # Probably have an invalid value on the TCL side
-            # (e.g. because the LED power field was left blank), set to 0
-            self.led_power.set(0.0)
-            led_power = 0.0
-        
-        # Clamp LED power level to 0-100, if it's out of range
-        if led_power < 0:
-            led_power = 0.0
-            self.led_power.set(led_power)
-        elif led_power > 100:
-            led_power = 100.0
-            self.led_power.set(led_power)
+    def _generate_float_validator(self, variable, clamp_min=None, clamp_max=None):
+        def _validate_float(value_if_allowed, validate_type):
+            # Allow blank values / a bare minus sign for key validation,
+            # but set the value to 0/clamp_min if the field is empty or invalid
+            # when focus leaves it
+            if value_if_allowed == '' or value_if_allowed == '-':
+                if validate_type == 'focusout':
+                    variable.set(clamp_min if clamp_min is not None else 0)
+                return True
+            try:
+                float_val = float(value_if_allowed)
+
+                # Clamp to min/max values when losing focus
+                if validate_type == 'focusout':
+                    if clamp_min is not None and float_val <= clamp_min:
+                        variable.set(clamp_min)
+                    elif clamp_max is not None and float_val >= clamp_max:
+                        variable.set(clamp_max)
+
+                return True
+            except ValueError:
+                return False
+        return _validate_float
 
     def _change_com_port(self, *args):
         # Reset model when changing COM ports
@@ -341,15 +339,14 @@ class FluorometerUI(tk.Tk):
         self.selected_com_port = tk.StringVar(value=Fluorometer.DEMO_PORT)
         self.current_step_text = tk.StringVar(value="")
         self.led_power = tk.DoubleVar(value=100)
-        self.known_concentration = tk.DoubleVar(value=0.0)
-        self.dilution_factor = tk.DoubleVar(value=1.0)
+        self.known_concentration = tk.DoubleVar(value=0)
+        self.dilution_factor = tk.DoubleVar(value=1)
         self.measured_concentration_label_string = tk.StringVar(value="Sample Concentration:")
         self.measured_concentration_string = tk.StringVar(value="-.--")
         self.measured_concentration_units_string = tk.StringVar(value=self.model.units)
         self.known_concentration_label_string = tk.StringVar(value="Known Concentration (ng/nL):")
 
         # Configure trace functions
-        self.led_power.trace_add('write', self._clamp_led_power)
         self.selected_com_port.trace_add('write', self._change_com_port)
         self.mode.trace_add('write', self._change_mode)
 
@@ -370,8 +367,9 @@ class FluorometerUI(tk.Tk):
             last_kit_idx = kit_idx
         ttk.Radiobutton(mode_inner_frame, text="Fluorometer", value=-1, variable=self.mode).grid(row=last_kit_idx+1, column=0, sticky="ew")
         led_power_label = ttk.Label(left_column_frame, text="LED Power (%):")
-        self.led_power_scale = ttk.Spinbox(left_column_frame, from_=0, to=100, width=5, textvariable=self.led_power, validate='key',
-                                           validatecommand=(self.register(self._validate_float), '%P'), state='disabled')
+        self.led_power_scale = ttk.Spinbox(left_column_frame, from_=0, to=100, width=5, textvariable=self.led_power, validate='all',
+                                           validatecommand=(self.register(self._generate_float_validator(self.led_power, clamp_min=0, clamp_max=100)), '%P', '%V'),
+                                           state='disabled')
 
         # Right Column Frame
         right_column_frame = ttk.Frame(self, padding="3")
@@ -379,10 +377,10 @@ class FluorometerUI(tk.Tk):
         self.com_port_combobox = ttk.Combobox(right_column_frame, textvariable=self.selected_com_port)
         known_concentration_label = ttk.Label(right_column_frame, textvariable=self.known_concentration_label_string)
         self.known_concentration_entry = ttk.Entry(right_column_frame, textvariable=self.known_concentration, state='disabled',
-                                              validate='key', validatecommand=(self.register(self._validate_float), '%P'))
+                                              validate='all', validatecommand=(self.register(self._generate_float_validator(self.known_concentration, clamp_min=0)), '%P', '%V'))
         dilution_factor_label = ttk.Label(right_column_frame, text="Dilution Factor:")
-        self.dilution_factor_entry = ttk.Entry(right_column_frame, textvariable=self.dilution_factor, validate='key',
-                                          validatecommand=(self.register(self._validate_float), '%P'))
+        self.dilution_factor_entry = ttk.Entry(right_column_frame, textvariable=self.dilution_factor, validate='all',
+                                          validatecommand=(self.register(self._generate_float_validator(self.dilution_factor, clamp_min=0)), '%P', '%V'))
         current_step_label = ttk.Label(right_column_frame, textvariable=self.current_step_text, foreground="red", font=("Arial", 16, "bold"), anchor='center')
 
         # Control Frame for Measure Button and Measured Concentration Label
