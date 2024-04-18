@@ -382,7 +382,9 @@ class FluorometerUI(tk.Tk):
                 return False
             elif response:
                 # User wants to save, do so
-                self._do_save()
+                if not self._do_save():
+                    # They cancelled the save, abort the restart
+                    return False
 
         if self.mode.get() == self._FLUOROMETER_MODE:
             self.model = FluorometerModel(self.selected_com_port.get())
@@ -434,6 +436,9 @@ class FluorometerUI(tk.Tk):
                 f.write(self.model.generate_csv())
             print(f"Data saved to {filename}")
             self.have_unsaved_measurements = False
+            return True
+        else:
+            return False
 
     def create_widgets(self):
         """Create and lay out widgets for the main application window."""
