@@ -16,7 +16,7 @@ class Fluorometer:
     """
 
     DEMO_PORT = "DEMO"
-    _demo_values = [0.0, 25000.0]
+    _demo_init_values = [0.0, 25000.0]
 
     def __init__(self, port):
         self.port = port
@@ -41,8 +41,8 @@ class Fluorometer:
         """
         if self.demo_mode:
             time.sleep(0.25)
-            if self.demo_idx < len(Fluorometer._demo_values):
-                retval = Fluorometer._demo_values[self.demo_idx]
+            if self.demo_idx < len(Fluorometer._demo_init_values):
+                retval = Fluorometer._demo_init_values[self.demo_idx]
                 self.demo_idx = self.demo_idx + 1
             else:
                 retval = random.random() * 25000.0
