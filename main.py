@@ -131,6 +131,15 @@ class QuantificationKitModel:
         y = np.linspace(np.min(self.standard_measurements), np.max(self.standard_measurements), 100)
         return self.quantification_kit.calculate_tube_concentrations(self.standard_measurements, y), y
     
+    def generate_csv(self):
+        """
+        Generates a CSV string containing the measured data.
+        """
+        ret = f"Sample Concentration ({self.units}), Measured Flouresence (arb.), Tube Concentration ({self.units}), Sample Input (uL)\n"
+        for sc, m, tc, df in zip(self.sample_concentrations, self.measurements, self.tube_concentrations, self.sample_inputs):
+            ret += f"{sc},{m},{tc},{df}\n"
+        return ret
+    
     def measure(self, port, led_power, known_concentration, sample_input):
         """
         Measures the sample concentration using the fluorometer.
@@ -181,9 +190,7 @@ class FluorometerModel:
         standard_measurements (list): A list of standard measurements.
         standard_concentrations (list): A list of standard concentrations.
         measurements (list): A list of measurements.
-        sample_inputs (list): A list of input volumes for the samples.
-        tube_concentrations (list): A list of calculated concentrations for the tubes.
-        sample_concentrations (list): A list of calculated concentrations for the original samples.
+        tube_concentrations (list): A list of tube concentrations as provided by the user.
         error (bool): Indicates if there was an error during measurement.
 
     Properties:
@@ -200,9 +207,7 @@ class FluorometerModel:
         self.standard_measurements = []
         self.standard_concentrations = []
         self.measurements = []
-        self.sample_inputs = []
         self.tube_concentrations = []
-        self.sample_concentrations = []
         self.error = False
 
     @property
@@ -215,6 +220,15 @@ class FluorometerModel:
     def generate_fitting_curve(self):
         return [], []
     
+    def generate_csv(self):
+        """
+        Generates a CSV string containing the measured data.
+        """
+        ret = f"Tube Concentration ({self.units}), Measured Flouresence (arb.)\n"
+        for tc, m in zip(self.tube_concentrations, self.measurements):
+            ret += f"{tc},{m}\n"
+        return ret
+    
     def measure(self, port, led_power, known_concentration, sample_input):
         """
         Measures the sample fluorescence using the fluorometer.
@@ -223,7 +237,7 @@ class FluorometerModel:
             port (str): The serial port connected to the fluorometer.
             led_power (float): Power output of the LED to use during measurement (arb %).
             known_concentration (float): The known concentration of the sample.
-            sample_input (float): The initial input concentration of the sample, if applicable.
+            sample_input (float): Unused.
 
         Returns:
             None
@@ -242,8 +256,6 @@ class FluorometerModel:
             return
 
         self.tube_concentrations.append(known_concentration)
-        self.sample_concentrations.append(known_concentration * 200 / sample_input)
-        self.sample_inputs.append(sample_input)
         self.measurements.append(measurement)
 
 class FluorometerUI(tk.Tk):
@@ -354,9 +366,7 @@ class FluorometerUI(tk.Tk):
         if filename:
             # Save the data to the CSV file
             with open(filename, 'w') as f:
-                f.write(f"Sample Concentration ({self.model.units}), Measured Flouresence (arb.), Tube Concentration ({self.model.units}), Sample Input (uL)\n")
-                for sc, m, tc, df in zip(self.model.sample_concentrations, self.model.measurements, self.model.tube_concentrations, self.model.sample_inputs):
-                    f.write(f"{sc},{m},{tc},{df}\n")
+                f.write(self.model.generate_csv())
             print(f"Data saved to {filename}")
 
     def create_widgets(self):
