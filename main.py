@@ -27,6 +27,21 @@ class QuantificationKit:
         self.tube_volume = tube_volume
         self.led_power = led_power
 
+    def validate_standard(self, standard_measurements, measurement):
+        """
+        Validates a provided standard measurement makes sense compared to
+        the previous standard measurements.
+        """
+        # Assume the first standard is always correct
+        if len(standard_measurements) == 0:
+            return True
+        # We assume that each standard increases in concentration,
+        # and is at least ~1000 units greater than the previous standard.
+        elif measurement <= (standard_measurements[-1] + 1000):
+            return False
+        else:
+            return True
+
     def calculate_tube_concentrations(self, standard_measurements, measurements):
         """
         Calculates the concentrations of the measurements by fitting a curve
@@ -108,11 +123,12 @@ class QuantificationKitModel:
         self.tube_concentrations = []
         self.sample_concentrations = []
         self.error = False
+        self.error_message = "No error set."
 
     @property
     def current_instruction(self):
         if self.error:
-            return "Previous measurement failed.\nCheck the fluorometer is connected."
+            return self.error_message
         elif len(self.standard_measurements) < len(self.quantification_kit.standards):
             return f"Please measure standard #{len(self.standard_measurements)+1}."
         else:
@@ -160,16 +176,24 @@ class QuantificationKitModel:
             with self.fluorometer:
                 measurement = self.fluorometer.read(self.quantification_kit.led_power)
                 self.error = False
+                self.error_message = "No error set."
         except Exception as e:
             self.error = True
+            self.error_message = "Previous measurement failed.\nCheck the fluorometer is connected."
             print("Measure failed with exception:")
             print(e)
             return
 
         if len(self.standard_measurements) < len(self.quantification_kit.standards):
-            self.standard_concentrations.append(self.quantification_kit.standards[len(self.standard_measurements)])
-            self.standard_measurements.append(measurement)
+            # In calibration phase, validate this measurement and add it to the list of calibrants
+            if self.quantification_kit.validate_standard(self.standard_measurements, measurement):
+                self.standard_concentrations.append(self.quantification_kit.standards[len(self.standard_measurements)])
+                self.standard_measurements.append(measurement)
+            else:
+                self.error = True
+                self.error_message = f"Previous measurement failed.\nCheck the correct standard (#{len(self.standard_measurements)+1}) has been inserted."
         else:
+            # Calibration complete, so measure sample instead
             self.measurements.append(measurement)
             self.sample_inputs.append(sample_input)
             self.tube_concentrations = self.quantification_kit.calculate_tube_concentrations(
