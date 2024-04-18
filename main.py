@@ -173,10 +173,9 @@ class QuantificationKitModel:
             Exception: If the measurement fails.
         """
         try:
-            with self.fluorometer:
-                measurement = self.fluorometer.read(self.quantification_kit.led_power)
-                self.error = False
-                self.error_message = "No error set."
+            measurement = self.fluorometer.read(self.quantification_kit.led_power)
+            self.error = False
+            self.error_message = "No error set."
         except Exception as e:
             self.error = True
             self.error_message = "Previous measurement failed.\nCheck the fluorometer is connected."
@@ -270,9 +269,8 @@ class FluorometerModel:
             Exception: If the measurement fails.
         """
         try:
-            with self.fluorometer:
-                measurement = self.fluorometer.read(led_power)
-                self.error = False
+            measurement = self.fluorometer.read(led_power)
+            self.error = False
         except Exception as e:
             self.error = True
             print("Measure failed with exception:")
