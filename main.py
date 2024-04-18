@@ -16,17 +16,18 @@ class QuantificationKit:
         name (str): The name of the quantification kit.
         units (str): The units of measurement.
         standards (list): Concentrations of the calibration standards.
+        tube_volume (float): The volume (uL) of fluid (sample + mix) used for measurements.
         led_power (float): The power (arb %) of the LED to use for measurements.
     """
 
-    def __init__(self, name, units, standards, led_power):
+    def __init__(self, name, units, standards, tube_volume, led_power):
         self.name = name
         self.units = units
         self.standards = standards
-        self.led_power = led_power
+        self.tube_volume = tube_volume
         self.led_power = led_power
 
-    def calculate_concentrations(self, standard_measurements, measurements):
+    def calculate_tube_concentrations(self, standard_measurements, measurements):
         """
         Calculates the concentrations of the measurements by fitting a curve
         to a set of standard calibrants.
@@ -36,26 +37,41 @@ class QuantificationKit:
             measurements (list): A list of sample measurements.
 
         Returns:
-            list: A list of concentrations corresponding to the measurements.
+            list: A list of tube concentrations corresponding to the measurements.
         """
         # Fit a line to standard_measurements and standards
         slope, intercept, _, _, _ = linregress(standard_measurements, self.standards)
         
         # Calculate the concentrations of the measurements using the fitted line
-        concentrations = (np.asarray(measurements) * slope + intercept)
+        tube_concentrations = (np.asarray(measurements) * slope + intercept)
         
-        return concentrations
+        return tube_concentrations
+
+    def calculate_sample_concentrations(self, sample_volumes, tube_concentrations):
+        """
+        Converts tube concentrations (i.e. concentration in thbe measured tube)
+        to sample concentrations (i.e. concentration in the original sample).
+
+        Args:
+            sample_volumes (list): A list of sample volumes (uL).
+            tube_concentrations (list): A list of tube concentrations.
+
+        Returns:
+            list: A list of sample concentrations corresponding to the given tube concentrations.
+        """
+        sample_concentrations = [tc * self.tube_volume / sv for tc, sv in zip(tube_concentrations, sample_volumes)]
+        return sample_concentrations
 
 # Supported quantification kits
 quantification_kits = [
-    QuantificationKit("High Sensitivity", "ng/uL", [
+    QuantificationKit("High Sensitivity", "ng/mL", [
         0.0,
-        10.0
-    ], 100),
-    QuantificationKit("Broad Range", "ng/uL", [
+        500.0
+    ], 200, 100),
+    QuantificationKit("Broad Range", "ng/mL", [
         0.0,
-        100.0
-    ], 100),
+        5000.0
+    ], 200, 100),
 ]
 
 class QuantificationKitModel:
@@ -68,8 +84,9 @@ class QuantificationKitModel:
         standard_measurements (list): A list of standard calibrant measurements.
         standard_concentrations (list): A list of standard calibrant concentrations.
         measurements (list): A list of sample measurements.
-        dilution_factors (list): A list of dilution factors for the samples.
-        concentrations (list): A list of calculated concentrations for the samples.
+        sample_inputs (list): A list of input volumes for the samples.
+        tube_concentrations (list): A list of calculated concentrations for the tubes.
+        sample_concentrations (list): A list of calculated concentrations for the original samples.
         error (bool): Indicates if there was an error during measurement.
 
     Properties:
@@ -77,7 +94,7 @@ class QuantificationKitModel:
 
     Methods:
         generate_fitting_curve(): Generates a fitting curve based on the standard measurements.
-        measure(port, led_power, known_concentration, dilution_factor): Performs a measurement using the fluorometer.
+        measure(port, led_power, known_concentration, sample_input): Performs a measurement using the fluorometer.
     """
 
     def __init__(self, quantification_kit):
@@ -86,8 +103,9 @@ class QuantificationKitModel:
         self.standard_measurements = []
         self.standard_concentrations = []
         self.measurements = []
-        self.dilution_factors = []
-        self.concentrations = []
+        self.sample_inputs = []
+        self.tube_concentrations = []
+        self.sample_concentrations = []
         self.error = False
 
     @property
@@ -111,9 +129,9 @@ class QuantificationKitModel:
         if len(self.standard_measurements) < len(self.quantification_kit.standards):
             return [], []
         y = np.linspace(np.min(self.standard_measurements), np.max(self.standard_measurements), 100)
-        return self.quantification_kit.calculate_concentrations(self.standard_measurements, y), y
+        return self.quantification_kit.calculate_tube_concentrations(self.standard_measurements, y), y
     
-    def measure(self, port, led_power, known_concentration, dilution_factor):
+    def measure(self, port, led_power, known_concentration, sample_input):
         """
         Measures the sample concentration using the fluorometer.
 
@@ -121,7 +139,7 @@ class QuantificationKitModel:
             port (str): The serial port connected to the fluorometer.
             led_power (float): Unused.
             known_concentration (float): Unused.
-            dilution_factor (float): The dilution factor of the sample.
+            sample_input (float): The initial volume of the sample.
 
         Returns:
             None
@@ -144,10 +162,14 @@ class QuantificationKitModel:
             self.standard_measurements.append(measurement)
         else:
             self.measurements.append(measurement)
-            self.dilution_factors.append(dilution_factor)
-            self.concentrations = self.quantification_kit.calculate_concentrations(
+            self.sample_inputs.append(sample_input)
+            self.tube_concentrations = self.quantification_kit.calculate_tube_concentrations(
                 self.standard_measurements,
                 self.measurements
+            )
+            self.sample_concentrations = self.quantification_kit.calculate_sample_concentrations(
+                self.sample_inputs,
+                self.tube_concentrations
             )
 
 class FluorometerModel:
@@ -159,8 +181,9 @@ class FluorometerModel:
         standard_measurements (list): A list of standard measurements.
         standard_concentrations (list): A list of standard concentrations.
         measurements (list): A list of measurements.
-        dilution_factors (list): A list of dilution factors.
-        concentrations (list): A list of concentrations.
+        sample_inputs (list): A list of input volumes for the samples.
+        tube_concentrations (list): A list of calculated concentrations for the tubes.
+        sample_concentrations (list): A list of calculated concentrations for the original samples.
         error (bool): Indicates if there was an error during measurement.
 
     Properties:
@@ -168,7 +191,7 @@ class FluorometerModel:
 
     Methods:
         generate_fitting_curve(): Generates a fitting curve (stubbed here).
-        measure(port, led_power, known_concentration, dilution_factor): Measures the fluorescence.
+        measure(port, led_power, known_concentration, sample_input): Measures the fluorescence.
 
     """
 
@@ -177,8 +200,9 @@ class FluorometerModel:
         self.standard_measurements = []
         self.standard_concentrations = []
         self.measurements = []
-        self.dilution_factors = []
-        self.concentrations = []
+        self.sample_inputs = []
+        self.tube_concentrations = []
+        self.sample_concentrations = []
         self.error = False
 
     @property
@@ -191,7 +215,7 @@ class FluorometerModel:
     def generate_fitting_curve(self):
         return [], []
     
-    def measure(self, port, led_power, known_concentration, dilution_factor):
+    def measure(self, port, led_power, known_concentration, sample_input):
         """
         Measures the sample fluorescence using the fluorometer.
 
@@ -199,7 +223,7 @@ class FluorometerModel:
             port (str): The serial port connected to the fluorometer.
             led_power (float): Power output of the LED to use during measurement (arb %).
             known_concentration (float): The known concentration of the sample.
-            dilution_factor (float): Unused.
+            sample_input (float): The initial input concentration of the sample, if applicable.
 
         Returns:
             None
@@ -217,8 +241,9 @@ class FluorometerModel:
             print(e)
             return
 
-        self.concentrations.append(known_concentration)
-        self.dilution_factors.append(1)
+        self.tube_concentrations.append(known_concentration)
+        self.sample_concentrations.append(known_concentration * 200 / sample_input)
+        self.sample_inputs.append(sample_input)
         self.measurements.append(measurement)
 
 class FluorometerUI(tk.Tk):
@@ -227,6 +252,8 @@ class FluorometerUI(tk.Tk):
 
     This class extends the `tk.Tk` class and provides the GUI for controlling the fluorometer and performing measurements.
     """
+    _FLUOROMETER_MODE = -1
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.title("DIYNAFLUOR Fluorometer")
@@ -274,22 +301,22 @@ class FluorometerUI(tk.Tk):
     def _change_mode(self, *args):
         self._do_restart()
 
-        # Enable known concentration entry and disable dilution factor entry
-        # for fluorometer mode, and vice versa for quantification kit mode
-        if self.mode.get() == -1:
+        # Enable known concentration/led power fields for fluorometer mode,
+        # and disable them for quantification kit mode
+        if self.mode.get() == self._FLUOROMETER_MODE:
             self.known_concentration_entry.config(state='enabled')
-            self.dilution_factor_entry.config(state='disabled')
+            self.sample_input_entry.config(state='disabled')
             self.led_power_scale.config(state='enabled')
             self.measured_concentration_label_string.set("Sample Fluoresence:")
         else:
             self.known_concentration_entry.config(state='disabled')
-            self.dilution_factor_entry.config(state='enabled')
+            self.sample_input_entry.config(state='enabled')
             self.led_power_scale.config(state='disabled')
             self.led_power.set(self.model.quantification_kit.led_power)
             self.measured_concentration_label_string.set("Sample Concentration:")
 
     def _do_restart(self):
-        if self.mode.get() == -1:
+        if self.mode.get() == self._FLUOROMETER_MODE:
             self.model = FluorometerModel()
         else:
             self.model = QuantificationKitModel(quantification_kits[self.mode.get()])
@@ -318,7 +345,7 @@ class FluorometerUI(tk.Tk):
                 port=self.selected_com_port.get(),
                 led_power=self.led_power.get(),
                 known_concentration=self.known_concentration.get(),
-                dilution_factor=self.dilution_factor.get()
+                sample_input=self.sample_input.get()
             )
         finally:
             self.after(0, self._measure_done)
@@ -329,9 +356,9 @@ class FluorometerUI(tk.Tk):
         if filename:
             # Save the data to the CSV file
             with open(filename, 'w') as f:
-                f.write("Sample Concentration, Flouresence, Tube Concentration, Dilution Factor\n")
-                for m, tc, df in zip(self.model.measurements, self.model.concentrations, self.model.dilution_factors):
-                    f.write(f"{tc*df},{m},{tc},{df}\n")
+                f.write(f"Sample Concentration ({self.model.units}), Measured Flouresence (arb.), Tube Concentration ({self.model.units}), Sample Input (uL)\n")
+                for sc, m, tc, df in zip(self.model.sample_concentrations, self.model.measurements, self.model.tube_concentrations, self.model.sample_inputs):
+                    f.write(f"{sc},{m},{tc},{df}\n")
             print(f"Data saved to {filename}")
 
     def create_widgets(self):
@@ -342,7 +369,7 @@ class FluorometerUI(tk.Tk):
         self.current_step_text = tk.StringVar(value="")
         self.led_power = tk.DoubleVar(value=100)
         self.known_concentration = tk.DoubleVar(value=0.0)
-        self.dilution_factor = tk.DoubleVar(value=1.0)
+        self.sample_input = tk.DoubleVar(value=10.0)
         self.measured_concentration_label_string = tk.StringVar(value="Sample Concentration:")
         self.measured_concentration_string = tk.StringVar(value="-.--")
         self.measured_concentration_units_string = tk.StringVar(value=self.model.units)
@@ -368,7 +395,7 @@ class FluorometerUI(tk.Tk):
         for kit_idx, kit in enumerate(quantification_kits):
             ttk.Radiobutton(mode_inner_frame, text=kit.name, value=kit_idx, variable=self.mode).grid(row=kit_idx, column=0, sticky="ew")
             last_kit_idx = kit_idx
-        ttk.Radiobutton(mode_inner_frame, text="Fluorometer", value=-1, variable=self.mode).grid(row=last_kit_idx+1, column=0, sticky="ew")
+        ttk.Radiobutton(mode_inner_frame, text="Fluorometer", value=self._FLUOROMETER_MODE, variable=self.mode).grid(row=last_kit_idx+1, column=0, sticky="ew")
         led_power_label = ttk.Label(left_column_frame, text="LED Power (%):")
         self.led_power_scale = ttk.Spinbox(left_column_frame, from_=0, to=100, width=5, textvariable=self.led_power, validate='key',
                                            validatecommand=(self.register(self._validate_float), '%P'), state='disabled')
@@ -380,8 +407,8 @@ class FluorometerUI(tk.Tk):
         known_concentration_label = ttk.Label(right_column_frame, textvariable=self.known_concentration_label_string)
         self.known_concentration_entry = ttk.Entry(right_column_frame, textvariable=self.known_concentration, state='disabled',
                                               validate='key', validatecommand=(self.register(self._validate_float), '%P'))
-        dilution_factor_label = ttk.Label(right_column_frame, text="Dilution Factor:")
-        self.dilution_factor_entry = ttk.Entry(right_column_frame, textvariable=self.dilution_factor, validate='key',
+        sample_input_label = ttk.Label(right_column_frame, text="Sample Input (uL):")
+        self.sample_input_entry = ttk.Entry(right_column_frame, textvariable=self.sample_input, validate='key',
                                           validatecommand=(self.register(self._validate_float), '%P'))
         current_step_label = ttk.Label(right_column_frame, textvariable=self.current_step_text, foreground="red", font=("Arial", 16, "bold"), anchor='center')
 
@@ -411,8 +438,8 @@ class FluorometerUI(tk.Tk):
         self.com_port_combobox.grid(row=0, column=1, pady=(10, 0), sticky="ew")
         known_concentration_label.grid(row=1, column=0, sticky="w")
         self.known_concentration_entry.grid(row=1, column=1, sticky="ew")
-        dilution_factor_label.grid(row=2, column=0, sticky="w")
-        self.dilution_factor_entry.grid(row=2, column=1, sticky="ew")
+        sample_input_label.grid(row=2, column=0, sticky="w")
+        self.sample_input_entry.grid(row=2, column=1, sticky="ew")
         current_step_label.grid(row=3, column=0, columnspan=2, sticky="ew", pady=(20, 0))
 
         # Configure grid for control frame
@@ -448,14 +475,14 @@ class FluorometerUI(tk.Tk):
     def sync_model(self):
         # Synchronise UI to model
         self.current_step_text.set(self.model.current_instruction)
-        if self.mode.get() == -1:
+        if self.mode.get() == self._FLUOROMETER_MODE:
             if len(self.model.measurements) > 0:
                 self.measured_concentration_string.set(f"{self.model.measurements[-1]:.2f}")
             else:
                 self.measured_concentration_string.set("-.--")
         else:
-            if len(self.model.concentrations) > 0:
-                self.measured_concentration_string.set(f"{self.model.concentrations[-1] * self.model.dilution_factors[-1]:.2f}")
+            if len(self.model.sample_concentrations) > 0:
+                self.measured_concentration_string.set(f"{self.model.sample_concentrations[-1]:.2f}")
             else:
                 self.measured_concentration_string.set("-.--")
         self.measured_concentration_units_string.set(value=self.model.units)
@@ -466,7 +493,7 @@ class FluorometerUI(tk.Tk):
         self.plot_ax.clear()
         self.plot_ax.plot(self.model.standard_concentrations, self.model.standard_measurements, 'go')
         self.plot_ax.plot(*self.model.generate_fitting_curve(), '--', color='grey')
-        self.plot_ax.plot(self.model.concentrations, self.model.measurements, 'bo')
+        self.plot_ax.plot(self.model.tube_concentrations, self.model.measurements, 'bo')
         self.plot_ax.set_xlabel(f'Tube Concentration ({self.model.units})')
         self.plot_ax.set_ylabel('Fluorescence (arb. units)')
         self.plot_ax.set_title('Fluorescence Measurements')
