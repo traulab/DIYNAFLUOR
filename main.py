@@ -59,7 +59,7 @@ class QuantificationKit:
         Returns:
             list: A list of sample concentrations corresponding to the given tube concentrations.
         """
-        sample_concentrations = [tc * self.tube_volume / sv for tc, sv in zip(tube_concentrations, sample_volumes)]
+        sample_concentrations = [tc * self.tube_volume / sv if sv != 0 else 0 for tc, sv in zip(tube_concentrations, sample_volumes)]
         return sample_concentrations
 
 # Supported quantification kits
