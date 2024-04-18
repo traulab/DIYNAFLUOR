@@ -1,5 +1,6 @@
 import serial
 import time
+import random
 
 class Fluorometer:
     """
@@ -15,20 +16,15 @@ class Fluorometer:
     """
 
     DEMO_PORT = "DEMO"
-    _demo_values = [0.0, 50000.0, 10000.0, 20000.0, 30000.0, 40000.0]
-    _demo_idx = 0
+    _demo_values = [0.0, 25000.0]
 
     def __init__(self, port):
+        self.port = port
         if port == Fluorometer.DEMO_PORT:
+            self.demo_idx = 0
             self.demo_mode = True
         else:
             self.demo_mode = False
-            self.serialInst = serial.Serial(
-                baudrate=9600,
-                timeout=10,
-                port=port
-            )
-            self.serialInst.readline() # Wait for Arduino to initialize
 
     def read(self, led_power):
         """
@@ -44,8 +40,12 @@ class Fluorometer:
             Exception: If there is no response from the Arduino.
         """
         if self.demo_mode:
-            retval = Fluorometer._demo_values[Fluorometer._demo_idx]
-            Fluorometer._demo_idx = (self._demo_idx + 1) % len(Fluorometer._demo_values)
+            time.sleep(0.25)
+            if self.demo_idx < len(Fluorometer._demo_values):
+                retval = Fluorometer._demo_values[self.demo_idx]
+                self.demo_idx = self.demo_idx + 1
+            else:
+                retval = random.random() * 25000.0
             return retval
         else:
             self.serialInst.write(f'r{int(led_power*255/100)}\r'.encode('utf-8'))
@@ -54,8 +54,14 @@ class Fluorometer:
                 raise Exception("No response from Arduino")
             return float(val)
 
-    # Stubs to allow use as a context manager
     def __enter__(self):
+        if not self.demo_mode:
+            self.serialInst = serial.Serial(
+                baudrate=9600,
+                timeout=10,
+                port=self.port
+            )
+            self.serialInst.readline() # Wait for Arduino to initialize
         return self    
     
     def __exit__(self, exc_type, exc_val, exc_tb):
