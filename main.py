@@ -79,13 +79,13 @@ class QuantificationKit:
 
 # Supported quantification kits
 quantification_kits = [
-    QuantificationKit("QuBit HS", "ng/mL", [
+    QuantificationKit("QuBit HS", "ng/uL", [
         0.0,
-        500.0
+        0.5,
     ], 200, 100),
-    QuantificationKit("QuBit BR", "ng/mL", [
+    QuantificationKit("QuBit BR", "ng/uL", [
         0.0,
-        5000.0
+        5.0
     ], 200, 100),
 ]
 
