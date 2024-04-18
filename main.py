@@ -79,13 +79,13 @@ class QuantificationKit:
 
 # Supported quantification kits
 quantification_kits = [
-    QuantificationKit("High Sensitivity", "ng/mL", [
+    QuantificationKit("High Sensitivity", "ng/uL", [
         0.0,
-        500.0
+        0.5,
     ], 200, 100),
-    QuantificationKit("Broad Range", "ng/mL", [
+    QuantificationKit("Broad Range", "ng/uL", [
         0.0,
-        5000.0
+        5.0
     ], 200, 100),
 ]
 
