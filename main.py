@@ -453,9 +453,14 @@ class FluorometerUI(tk.Tk):
         self.selected_com_port.trace_add('write', self._change_com_port)
         self.mode.trace_add('write', self._change_mode)
 
+        # Logo
+        self.logo_image = tk.PhotoImage(file="./logo.png").subsample(4)
+        logo_label = ttk.Label(self, image=self.logo_image, anchor='center', borderwidth=3, relief='groove', background='white', padding=5)
+        logo_label.grid(row=0, column=0, columnspan=2)
+
         # Plot Frame
         plot_frame = ttk.Frame(self, padding="3")
-        plot_frame.grid(row=0, column=0, columnspan=2, sticky="ew")
+        plot_frame.grid(row=1, column=0, columnspan=2, sticky="ew")
         fig, self.plot_ax = plt.subplots()
         self.fig_canvas = FigureCanvasTkAgg(fig, master=plot_frame)
         self.fig_canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
@@ -502,9 +507,9 @@ class FluorometerUI(tk.Tk):
         measured_concentration_units_label = ttk.Label(measured_concentration_frame, textvariable=self.measured_concentration_units_string)
 
         # Layout Configuration
-        left_column_frame.grid(row=1, column=0, sticky="nsew", padx=(0, 10))
-        right_column_frame.grid(row=1, column=1, sticky="nsew")
-        control_frame.grid(row=2, column=0, columnspan=2, pady=(10, 0), sticky="ew")
+        left_column_frame.grid(row=2, column=0, sticky="nsew", padx=(0, 10))
+        right_column_frame.grid(row=2, column=1, sticky="nsew")
+        control_frame.grid(row=3, column=0, columnspan=2, pady=(10, 0), sticky="ew")
 
         # Configure grid for left column frame
         mode_labelframe.grid(row=0, column=0, sticky="ew", columnspan=2)
@@ -539,7 +544,7 @@ class FluorometerUI(tk.Tk):
         right_column_frame.columnconfigure(1, weight=1)
         plot_frame.columnconfigure(0, weight=1)
         control_frame.columnconfigure(1, weight=1)
-        self.rowconfigure(1, weight=1)
+        self.rowconfigure(2, weight=1)
         
     def refresh_com_ports(self):
         # Refresh the COM port list (default to DEMO port if no COM ports are available)
