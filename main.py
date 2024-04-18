@@ -272,9 +272,14 @@ class FluorometerUI(tk.Tk):
         # Add explicit quit handler, since on some systems the window close button doesn't work
         self.protocol("WM_DELETE_WINDOW", self._quit)
         self.model = QuantificationKitModel(quantification_kits[0])
+        self.have_unsaved_measurements = False
         self.create_widgets()
         self.refresh_com_ports()
         self.sync_model()
+        # Track previous mode and COM port to allow changes to be undone if
+        # the user cancels the change
+        self.previous_mode = self.mode.get()
+        self.previous_selected_com_port = self.selected_com_port.get()
 
     def _quit(self):
         self.quit()
@@ -306,10 +311,23 @@ class FluorometerUI(tk.Tk):
 
     def _change_com_port(self, *args):
         # Reset model when changing COM ports
-        self._do_restart()
+        if self._do_restart():
+            self.previous_selected_com_port = self.selected_com_port.get()
+        else:
+            self.selected_com_port.set(self.previous_selected_com_port)
 
     def _change_mode(self, *args):
-        self._do_restart()
+        if self._do_restart():
+            self.previous_mode = self.mode.get()
+        else:
+            # Revert to previous mode and refresh radiobutton state manually,
+            # since the trace that would normally do this is disabled right now
+            self.mode.set(self.previous_mode)
+            for rb in self.mode_radiobuttons:
+                if rb['value'] == self.previous_mode:
+                    rb['state'] = 'selected'
+                else:
+                    rb['state'] = 'alternate'
 
         # Enable known concentration/led power fields for fluorometer mode,
         # and disable them for quantification kit mode
@@ -326,12 +344,28 @@ class FluorometerUI(tk.Tk):
             self.measured_concentration_label_string.set("Sample Concentration:")
 
     def _do_restart(self):
+        # Prompt user to save if they have unsaved data
+        if self.have_unsaved_measurements:
+            response = tk.messagebox.askyesnocancel(
+                "Unsaved Data",
+                "You have unsaved measurements. This operation will discard them, would you like to save them before continuing?",
+                default=tk.messagebox.CANCEL, parent=self
+            )
+            if response is None:
+                # User cancelled, abort the restart
+                return False
+            elif response:
+                # User wants to save, do so
+                self._do_save()
+
         if self.mode.get() == self._FLUOROMETER_MODE:
             self.model = FluorometerModel()
         else:
             self.model = QuantificationKitModel(quantification_kits[self.mode.get()])
+        self.have_unsaved_measurements = False
         self.measure_button.config(state='enabled')
         self.sync_model()
+        return True
 
     def _do_measure(self):
         # We perform measurements in a seperate thread, since they block on
@@ -343,10 +377,12 @@ class FluorometerUI(tk.Tk):
         self.restart_button.config(state='disabled')
         self.save_button.config(state='disabled')
 
-    def _measure_done(self):
+    def _measure_done(self, success):
         self.measure_button.config(state='enabled')
         self.restart_button.config(state='enabled')
         self.save_button.config(state='enabled')
+        if success:
+            self.have_unsaved_measurements = True
         self.sync_model()
     
     def _measure_thread(self):
@@ -358,7 +394,7 @@ class FluorometerUI(tk.Tk):
                 sample_input=self.sample_input.get()
             )
         finally:
-            self.after(0, self._measure_done)
+            self.after(0, self._measure_done, not self.model.error)
 
     def _do_save(self):
         filetypes = [('CSV Files', '*.csv')]
@@ -368,6 +404,7 @@ class FluorometerUI(tk.Tk):
             with open(filename, 'w') as f:
                 f.write(self.model.generate_csv())
             print(f"Data saved to {filename}")
+            self.have_unsaved_measurements = False
 
     def create_widgets(self):
         """Create and lay out widgets for the main application window."""
@@ -399,10 +436,15 @@ class FluorometerUI(tk.Tk):
         mode_labelframe = ttk.LabelFrame(left_column_frame, text="Mode:", padding="3")
         mode_inner_frame = ttk.Frame(mode_labelframe)
         last_kit_idx = 0
+        self.mode_radiobuttons = []
         for kit_idx, kit in enumerate(quantification_kits):
-            ttk.Radiobutton(mode_inner_frame, text=kit.name, value=kit_idx, variable=self.mode).grid(row=kit_idx, column=0, sticky="ew")
+            kit_radiobutton = ttk.Radiobutton(mode_inner_frame, text=kit.name, value=kit_idx, variable=self.mode)
+            kit_radiobutton.grid(row=kit_idx, column=0, sticky="ew")
+            self.mode_radiobuttons.append(kit_radiobutton)
             last_kit_idx = kit_idx
-        ttk.Radiobutton(mode_inner_frame, text="Fluorometer", value=self._FLUOROMETER_MODE, variable=self.mode).grid(row=last_kit_idx+1, column=0, sticky="ew")
+        fluorometer_radiobutton = ttk.Radiobutton(mode_inner_frame, text="Fluorometer", value=self._FLUOROMETER_MODE, variable=self.mode)
+        fluorometer_radiobutton.grid(row=last_kit_idx+1, column=0, sticky="ew")
+        self.mode_radiobuttons.append(fluorometer_radiobutton)
         led_power_label = ttk.Label(left_column_frame, text="LED Power (%):")
         self.led_power_scale = ttk.Spinbox(left_column_frame, from_=0, to=100, width=5, textvariable=self.led_power, validate='all',
                                            validatecommand=(self.register(self._generate_float_validator(self.led_power, clamp_min=0, clamp_max=100)), '%P', '%V'),
