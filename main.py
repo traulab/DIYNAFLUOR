@@ -273,6 +273,7 @@ class FluorometerUI(tk.Tk):
         self.protocol("WM_DELETE_WINDOW", self._quit)
         self.model = QuantificationKitModel(Fluorometer.DEMO_PORT, quantification_kits[0])
         self.have_unsaved_measurements = False
+        self.measurement_in_progress = False
         self.create_widgets()
         self.refresh_com_ports()
         self.sync_model()
@@ -317,7 +318,8 @@ class FluorometerUI(tk.Tk):
             self.selected_com_port.set(self.previous_selected_com_port)
 
     def _change_mode(self, *args):
-        if self._do_restart():
+        # Cancel the mode change if a measurement is in progress.
+        if not self.measurement_in_progress and self._do_restart():
             self.previous_mode = self.mode.get()
         else:
             # Revert to previous mode and refresh radiobutton state manually,
@@ -376,13 +378,17 @@ class FluorometerUI(tk.Tk):
         self.measure_button.config(state='disabled')
         self.restart_button.config(state='disabled')
         self.save_button.config(state='disabled')
+        self.com_port_combobox.config(state='disabled')
+        self.measurement_in_progress = True
 
     def _measure_done(self, success):
         self.measure_button.config(state='enabled')
         self.restart_button.config(state='enabled')
         self.save_button.config(state='enabled')
+        self.com_port_combobox.config(state='enabled')
         if success:
             self.have_unsaved_measurements = True
+        self.measurement_in_progress = False
         self.sync_model()
     
     def _measure_thread(self):
