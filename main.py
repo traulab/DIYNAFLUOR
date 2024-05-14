@@ -152,9 +152,11 @@ class QuantificationKitModel:
         """
         Generates a CSV string containing the measured data.
         """
-        ret = f"Sample Concentration ({self.units}), Measured Flouresence (arb.), Tube Concentration ({self.units}), Sample Input (uL)\n"
-        for sc, m, tc, df in zip(self.sample_concentrations, self.measurements, self.tube_concentrations, self.sample_inputs):
-            ret += f"{sc},{m},{tc},{df}\n"
+        ret = f"Name, Sample Concentration ({self.units}), Measured Flouresence (arb.), Tube Concentration ({self.units}), Sample Input (uL)\n"
+        for i, (m, tc) in enumerate(zip(self.standard_measurements, self.standard_concentrations)):
+            ret += f"Standard #{i},-,{m},{tc},-\n"
+        for i, (sc, m, tc, df) in enumerate(zip(self.sample_concentrations, self.measurements, self.tube_concentrations, self.sample_inputs)):
+            ret += f"Sample #{i},{sc},{m},{tc},{df}\n"
         return ret
     
     def measure(self, led_power, known_concentration, sample_input):
