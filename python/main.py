@@ -9,6 +9,9 @@ import threading
 import sys
 from pathlib import Path
 
+# Version number to display on the GUI
+VERSION = (1, 0, 0)
+
 class QuantificationKit:
     """
     A class representing a quantification kit used for measuring DNA concentrations.
@@ -468,6 +471,8 @@ class FluorometerUI(tk.Tk):
         self.logo_image = tk.PhotoImage(file=logo_path).subsample(4)
         logo_label = ttk.Label(self, image=self.logo_image, anchor='center', borderwidth=3, relief='groove', background='white', padding=5)
         logo_label.grid(row=0, column=0, columnspan=2)
+        version_label = ttk.Label(self, text=f"Version {VERSION[0]}.{VERSION[1]}.{VERSION[2]}", anchor='e', padding=5)
+        version_label.place(relx=1, rely=0, anchor='ne')
 
         # Plot Frame
         plot_frame = ttk.Frame(self, padding="3")
