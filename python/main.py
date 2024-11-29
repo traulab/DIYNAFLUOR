@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
 import threading
+import sys
+from pathlib import Path
 
 class QuantificationKit:
     """
@@ -458,7 +460,12 @@ class FluorometerUI(tk.Tk):
         self.mode.trace_add('write', self._change_mode)
 
         # Logo
-        self.logo_image = tk.PhotoImage(file="./logo.png").subsample(4)
+        try:
+            logo_path = Path(sys._MEIPASS) / "logo.png"
+        except Exception:
+            logo_path = Path(__file__).parent / "logo.png"
+
+        self.logo_image = tk.PhotoImage(file=logo_path).subsample(4)
         logo_label = ttk.Label(self, image=self.logo_image, anchor='center', borderwidth=3, relief='groove', background='white', padding=5)
         logo_label.grid(row=0, column=0, columnspan=2)
 
@@ -590,4 +597,12 @@ class FluorometerUI(tk.Tk):
 if __name__ == "__main__":
     # Run GUI main loop
     root = FluorometerUI()
+
+    # If we're running in a pyinstaller bundle, close the splash screen when the GUI is ready
+    try:
+        import pyi_splash
+        root.after_idle(pyi_splash.close)
+    except ImportError:
+        pass
+    
     root.mainloop()
