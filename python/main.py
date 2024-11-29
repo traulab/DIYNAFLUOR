@@ -517,6 +517,7 @@ class FluorometerUI(tk.Tk):
         self.measure_button = ttk.Button(control_frame, text="Measure", command=self._do_measure)
         self.restart_button = ttk.Button(control_frame, text="Restart", command=self._do_restart)
         self.save_button = ttk.Button(control_frame, text="Save", command=self._do_save)
+        control_frame_spacer = ttk.Frame(control_frame, padding="3")
         measured_concentration_frame = ttk.Frame(control_frame)
         measured_concentration_label = ttk.Label(measured_concentration_frame, textvariable=self.measured_concentration_label_string)
         measured_concentration_entry = ttk.Entry(measured_concentration_frame, textvariable=self.measured_concentration_string, state='readonly', width=10)
@@ -546,7 +547,8 @@ class FluorometerUI(tk.Tk):
         self.measure_button.grid(row=0, column=0, sticky="w", padx=(20, 0), pady=(0, 10), ipadx=20, ipady=5)
         self.restart_button.grid(row=0, column=1, sticky="w", padx=(20, 0), pady=(0, 10), ipadx=20, ipady=5)
         self.save_button.grid(row=0, column=2, sticky="w", padx=(20, 0), pady=(0, 10), ipadx=20, ipady=5)
-        measured_concentration_frame.grid(row=0, column=3, sticky="ew", padx=(20, 20), pady=(0, 10))
+        control_frame_spacer.grid(row=0, column=3)
+        measured_concentration_frame.grid(row=0, column=4, sticky="ew", padx=(20, 20), pady=(0, 10))
 
         # Configure grid for measured concentration frame
         measured_concentration_label.grid(row=0, column=0, sticky="w")
@@ -559,7 +561,7 @@ class FluorometerUI(tk.Tk):
         mode_labelframe.columnconfigure(0, weight=1)
         right_column_frame.columnconfigure(1, weight=1)
         plot_frame.columnconfigure(0, weight=1)
-        control_frame.columnconfigure(1, weight=1)
+        control_frame.columnconfigure(3, weight=1)
         self.rowconfigure(2, weight=1)
         
     def refresh_com_ports(self):
