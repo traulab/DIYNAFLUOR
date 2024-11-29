@@ -4,7 +4,6 @@ import tkinter as tk
 from tkinter import ttk
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from scipy.stats import linregress
 import numpy as np
 import threading
 
@@ -55,7 +54,7 @@ class QuantificationKit:
             list: A list of tube concentrations corresponding to the measurements.
         """
         # Fit a line to standard_measurements and standards
-        slope, intercept, _, _, _ = linregress(standard_measurements, self.standards)
+        slope, intercept = np.polyfit(standard_measurements, self.standards, 1)
         
         # Calculate the concentrations of the measurements using the fitted line
         tube_concentrations = (np.asarray(measurements) * slope + intercept)
