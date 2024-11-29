@@ -155,11 +155,11 @@ class QuantificationKitModel:
         """
         ret = f"Name, Sample Concentration ({self.units}), Measured Flouresence (arb.), Tube Concentration ({self.units}), Sample Input (uL)\n"
         for i, (m, tc) in enumerate(zip(self.standard_measurements, self.standard_concentrations)):
-            ret += f"Standard #{i},-,{m},{tc},-\n"
-        for i, (sc, m, tc, df) in enumerate(zip(self.sample_concentrations, self.measurements, self.tube_concentrations, self.sample_inputs)):
-            ret += f"Sample #{i},{sc},{m},{tc},{df}\n"
+            ret += f"Standard #{i},-,{m},{tc:.4f},-\n"
+        for i, (sc, m, tc, si) in enumerate(zip(self.sample_concentrations, self.measurements, self.tube_concentrations, self.sample_inputs)):
+            ret += f"Sample #{i},{sc:.4f},{m:.4f},{tc:.4f},{si:.4f}\n"
         return ret
-    
+
     def measure(self, led_power, known_concentration, sample_input):
         """
         Measures the sample concentration using the fluorometer.
@@ -253,7 +253,7 @@ class FluorometerModel:
         """
         ret = f"Tube Concentration ({self.units}), Measured Flouresence (arb.)\n"
         for tc, m in zip(self.tube_concentrations, self.measurements):
-            ret += f"{tc},{m}\n"
+            ret += f"{tc:.4f},{m:.4f}\n"
         return ret
     
     def measure(self, led_power, known_concentration, sample_input):
@@ -451,7 +451,7 @@ class FluorometerUI(tk.Tk):
         self.known_concentration = tk.DoubleVar(value=0.0)
         self.sample_input = tk.DoubleVar(value=10.0)
         self.measured_concentration_label_string = tk.StringVar(value="Sample Concentration:")
-        self.measured_concentration_string = tk.StringVar(value="-.--")
+        self.measured_concentration_string = tk.StringVar(value="-.----")
         self.measured_concentration_units_string = tk.StringVar(value=self.model.units)
         self.known_concentration_label_string = tk.StringVar(value="Known Concentration (ng/nL):")
 
@@ -572,14 +572,14 @@ class FluorometerUI(tk.Tk):
         self.current_step_text.set(self.model.current_instruction)
         if self.mode.get() == self._FLUOROMETER_MODE:
             if len(self.model.measurements) > 0:
-                self.measured_concentration_string.set(f"{self.model.measurements[-1]:.2f}")
+                self.measured_concentration_string.set(f"{self.model.measurements[-1]:.4f}")
             else:
-                self.measured_concentration_string.set("-.--")
+                self.measured_concentration_string.set("-.----")
         else:
             if len(self.model.sample_concentrations) > 0:
-                self.measured_concentration_string.set(f"{self.model.sample_concentrations[-1]:.2f}")
+                self.measured_concentration_string.set(f"{self.model.sample_concentrations[-1]:.4f}")
             else:
-                self.measured_concentration_string.set("-.--")
+                self.measured_concentration_string.set("-.----")
         self.measured_concentration_units_string.set(value=self.model.units)
 
         self.known_concentration_label_string.set(f"Known Concentration ({self.model.units}):")
