@@ -57,7 +57,7 @@ We have developed a simple verification assay using commercial fluorescent DNA q
 ![image](https://github.com/user-attachments/assets/e00b7031-2111-4037-b1da-9da705c22495)
 
 
-### #Customize it
+#### Customize it
 The default DIYNAFLUOR is designed to work with fluorophores with excitation and emission maximums of ~470ex/520em. Want to measure something else? Simply swap out the LED, and excitation and emission filters for your custom fluorophore. We would love to hear how your custom build goes!
 
 
