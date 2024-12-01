@@ -39,7 +39,7 @@ Depending on your printer, this entire process can be accomplished in as little 
 
 ![image](https://github.com/user-attachments/assets/028a4b65-122d-4d15-8554-e96111e530df)
 
-*3D printing of all parts on a Bambu Lab A1 was able to be accomplished in ~4 hour, with construction and validation taking about 2 hours.
+*3D printing of all parts on a Bambu Lab A1 was able to be accomplished in ~4 hour, with construction and verification taking about 2 hours.
 
 
 #### Install the Software
