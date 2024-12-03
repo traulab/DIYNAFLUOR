@@ -5,6 +5,9 @@ The DIYNAFLUOR (**DIY** **N**ucleic **A**cid **FLUOR**ometer) is a $40 USD, open
 
 The DIYNAFLUOR is designed to work with commercial and custom fluorescent DNA quantification kits, enabling measurements of nano-microgram levels of DNA.
 
+![image](https://github.com/user-attachments/assets/0869c42b-0728-4fab-8037-7000797f385a)
+
+
 Focusing on QCing Nanopore sequencing libraries, The DIYNAFLUOR aims to help remove barriers to genomic analysis (e.g., metagenomic sequencing) in resource limited settings.
 
 
