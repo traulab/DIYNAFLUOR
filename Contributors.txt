@@ -1,0 +1,28 @@
+Contributors
+
+•	Will Anderson# – Project lead, DIYNAFLUOR Device design & development, Experimental design, General experimentation.
+
+•	Fiach Antaw# – Embedded and GUI programming, Device design input.
+
+•	Sophie Kenny# – Experimental design, Verification experimentation.
+
+•	Harshita Rupani# – Verification and Validation experimentation.
+
+•	Ramlah Khamis# – Validation experimentation.
+
+•	Nicolas Constantin# – Verification experimentation.
+
+•	Vinay Kumar# – Verification experimentation.
+
+•	Anna Gemmell* – Verification experimentation.
+
+•	Craig Bell* – Validation experimentation.
+
+•	Matt Trau# – Intellectual discussions, Strategy, Inspiration.
+
+•	Darren Korbie# – Experimental design, Intellectual discussions, Bioinformatic analysis, Strategy.
+
+
+#The Centre for Personalised Nanomedicine within the Australian Institute for Bioengineering and Nanotechnology at The University of Queensland, St Lucia, Australia, 4067.
+
+*Centre for Advanced Imaging and Australian Institute for Bioengineering and Nanotechnology within the Australian Institute for Bioengineering and Nanotechnology at The University of Queensland, St Lucia, Australia, 4067.
