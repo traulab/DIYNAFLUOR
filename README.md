@@ -59,7 +59,6 @@ We have also developed a Windows 10/11 executable Graphical User Interface (GUI)
 We have developed a simple verification assay using commercial fluorescent DNA quantification kits to assess if your DIYNAFLUOR is working as expected. (see [Build Instructions.pdf](Build%20Instructions.pdf)) 
 ![image](https://github.com/user-attachments/assets/e00b7031-2111-4037-b1da-9da705c22495)
 
-
 #### Customize it
 The default DIYNAFLUOR is designed to work with fluorophores with excitation and emission maximums of ~470ex/520em. Want to measure something else? Simply swap out the LED, and excitation and emission filters for your custom fluorophore. We would love to hear how your custom build goes!
 
@@ -73,6 +72,9 @@ More details about the DIYNAFLUOR and its performance can be found in our Prepri
 
 Questions? Comments? Mistakes in the documents? 😅 Post a comment in the "Issues" section or contact lead author, Will Anderson (w.anderson1@uq.edu.au).
 
+
+## Contributors
+Everyone who made this project possible! ([Contributors.txt](Contributors.txt))
 
 ## License
 This project is licensed under the GNU GENERAL PUBLIC LICENSE Version 3 ([LICENSE.txt](LICENSE.txt)).
