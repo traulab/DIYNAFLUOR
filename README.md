@@ -79,9 +79,9 @@ Questions? Comments? Mistakes in the documents? 😅 Post a comment in the "Issu
 
 
 ## Contributors
-Everyone who made this project possible! ([Contributors.txt](Contributors.txt))
+Everyone who made this project possible! (See [Contributors.txt](Contributors.txt))
 
 ## License
-This project is licensed under the GNU GENERAL PUBLIC LICENSE Version 3 ([LICENSE.txt](LICENSE.txt)).
+This project is licensed under the GNU GENERAL PUBLIC LICENSE Version 3 (See [LICENSE](https://github.com/traulab/DIYNAFLUOR/blob/main/LICENSE))
 
 
