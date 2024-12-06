@@ -56,8 +56,13 @@ We have also developed a Windows 10/11 executable Graphical User Interface (GUI)
 
 
 #### Verify the performance of your DIYNAFLUOR
-We have developed a simple verification assay using commercial fluorescent DNA quantification kits to assess if your DIYNAFLUOR is working as expected. (see [Build Instructions.pdf](Build%20Instructions.pdf)) 
-![image](https://github.com/user-attachments/assets/e00b7031-2111-4037-b1da-9da705c22495)
+We have developed a simple verification assay using commercial fluorescent DNA quantification kits to assess if your DIYNAFLUOR is working as expected. (see [Build Instructions.pdf](Build%20Instructions.pdf))
+
+<img width="650" alt="image" src="https://github.com/user-attachments/assets/904aeb77-8dbe-44eb-bcb3-1c4efc1ac50f">
+
+
+#### Make Low-Cost DNA Measurements
+Quantify DNA concentrations between 0–10 ng/μL with only ~2% error using our custom protocol— for only $0.12 USD per measurement. (See [Protocol for Low-Cost DNA Quantification Assay.pdf](Protocol%20for%20Low-Cost%20DNA%20Quantification%20Assay.pdf))
 
 #### Customize it
 The default DIYNAFLUOR is designed to work with fluorophores with excitation and emission maximums of ~470ex/520em. Want to measure something else? Simply swap out the LED, and excitation and emission filters for your custom fluorophore. We would love to hear how your custom build goes!
