@@ -62,7 +62,7 @@ We have developed a simple verification assay using commercial fluorescent DNA q
 
 
 #### Make Low-Cost DNA Measurements
-Quantify DNA concentrations between 0–10 ng/μL using our custom protocol, for only $0.12 USD per measurement. (See [Protocol for Low-Cost DNA Quantification Assay.pdf](Protocol%20for%20Low-Cost%20DNA%20Quantification%20Assay.pdf))
+Designed for STEM Educators - Quantify DNA concentrations between 0–10 ng/μL using the popular SYBR® Safe gel stain, for only $0.12 USD per measurement. (See [Protocol for Low-Cost DNA Quantification Assay.pdf](Protocol%20for%20Low-Cost%20DNA%20Quantification%20Assay.pdf))
 
 #### Customize it
 The default DIYNAFLUOR is designed to work with fluorophores with excitation and emission maximums of ~470ex/520em. Want to measure something else? Simply swap out the LED, and excitation and emission filters for your custom fluorophore. We would love to hear how your custom build goes!
