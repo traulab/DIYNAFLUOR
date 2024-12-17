@@ -1,6 +1,8 @@
  # DIYNAFLUOR
 The DIYNAFLUOR (**DIY** **N**ucleic **A**cid **FLUOR**ometer) is a $40 USD, open source, 3D printed, solder-free, portable, robust, DNA Fluorometer **YOU** can build!
 
+Our Preprint is now available! (see https://www.biorxiv.org/content/10.1101/2024.12.16.626200v1)
+
 ![image](https://github.com/user-attachments/assets/3bd7db67-980f-4d07-9997-15d10ba4dda3)
 
 The DIYNAFLUOR is designed to work with commercial and custom fluorescent DNA quantification kits, enabling measurements of nano-microgram levels of DNA.
@@ -73,7 +75,7 @@ The default DIYNAFLUOR is designed to work with fluorophores with excitation and
 
 
 ## To learn more
-More details about the DIYNAFLUOR and its performance can be found in our Preprint (Coming soon).
+More details about the DIYNAFLUOR and its performance can be found in our Preprint. (See https://www.biorxiv.org/content/10.1101/2024.12.16.626200v1).
 
 Questions? Comments? Mistakes in the documents? 😅 Post a comment in the "Issues" section or contact lead author, Will Anderson (w.anderson1@uq.edu.au).
 
