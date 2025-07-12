@@ -8,6 +8,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
 import threading
 import sys
+import platform
 from pathlib import Path
 
 # Version number to display on the GUI
@@ -317,9 +318,9 @@ class FluorometerUI(tk.Tk):
             icon_path = Path(sys._MEIPASS) / "icon.png"
         except Exception:
             icon_path = Path(__file__).parent / "icon.png"
-        image = Image.open(icon_path)
-        photo = ImageTk.PhotoImage(image)
-        self.iconphoto(True, photo)
+        icon_image = Image.open(icon_path)
+        icon_photo = ImageTk.PhotoImage(icon_image)
+        self.iconphoto(True, icon_photo)
 
     def _quit(self):
         self.quit()
@@ -479,7 +480,10 @@ class FluorometerUI(tk.Tk):
         except Exception:
             logo_path = Path(__file__).parent / "logo.png"
 
-        self.logo_image = tk.PhotoImage(file=logo_path).subsample(4)
+        logo_image = Image.open(logo_path)
+        logo_scale = logo_image.width / (self.winfo_fpixels('2.9i'))
+        logo_photo = ImageTk.PhotoImage(logo_image.resize((int(logo_image.width / logo_scale), int(logo_image.height / logo_scale))))
+        self.logo_image = logo_photo
         logo_label = ttk.Label(self, image=self.logo_image, anchor='center', borderwidth=3, relief='groove', background='white', padding=5)
         logo_label.grid(row=0, column=0, columnspan=2)
         version_label = ttk.Label(self, text=f"Version {VERSION[0]}.{VERSION[1]}.{VERSION[2]}", anchor='e', padding=5)
@@ -616,6 +620,11 @@ class FluorometerUI(tk.Tk):
         self.fig_canvas.draw()
 
 if __name__ == "__main__":
+    # Mark process as DPI-aware on Windows before rendering any GUI elements (not needed on Linux/macOS)
+    if sys.platform == 'win32' and int(platform.release()) >= 8:
+        import ctypes
+        ctypes.windll.shcore.SetProcessDpiAwareness(2)
+
     # Run GUI main loop
     root = FluorometerUI()
 
