@@ -11,7 +11,7 @@ import sys
 from pathlib import Path
 
 # Version number to display on the GUI
-VERSION = (1, 0, 1)
+VERSION = (1, 1, 0)
 
 class QuantificationKit:
     """
