@@ -53,17 +53,18 @@ exe = EXE(
     icon=['icon.png'],
 )
 
+coll = COLLECT(
+    exe,
+    a.binaries,
+    a.datas,
+    strip=False,
+    upx=True,
+    upx_exclude=[],
+    name='diynafluor',
+)
+
 if sys.platform == 'darwin':
     # Additionally create an app bundle on Darwin
-    coll = COLLECT(
-        exe,
-        a.binaries,
-        a.datas,
-        strip=False,
-        upx=True,
-        upx_exclude=[],
-        name='diynafluor',
-    )
     app = BUNDLE(
         coll,
         name='diynafluor.app',
