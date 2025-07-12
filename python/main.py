@@ -479,6 +479,12 @@ class FluorometerUI(tk.Tk):
         self.fig_canvas = FigureCanvasTkAgg(fig, master=self)
         self.fig_canvas.get_tk_widget().grid(row=1, column=0, columnspan=2, sticky='nsew')
 
+        # Workaround: On macOS, the default figure DPI passed to the constructor is multiplied by [NSWindow backingScaleFactor] to ensure
+        # consistent figure sizing between platforms. This then seems to get doubled again when the canvas is rendered by TkInter, so we
+        # explicitly fix the DPI here to match the size of a TkInter point to avoid this issue.
+        # This may be addressed in a future version of matplotlib, after which this line may not be necessary.
+        fig.set_dpi(self.fig_canvas.get_tk_widget().winfo_fpixels('1i'))
+
         # Left Column Frame
         left_column_frame = ttk.Frame(self, padding="3")
         mode_labelframe = ttk.LabelFrame(left_column_frame, text="Mode:", padding="3")
