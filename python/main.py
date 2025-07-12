@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 # Version number to display on the GUI
-VERSION = (1, 0, 0)
+VERSION = (1, 0, 1)
 
 class QuantificationKit:
     """
@@ -475,11 +475,9 @@ class FluorometerUI(tk.Tk):
         version_label.place(relx=1, rely=0, anchor='ne')
 
         # Plot Frame
-        plot_frame = ttk.Frame(self, padding="3")
-        plot_frame.grid(row=1, column=0, columnspan=2, sticky="ew")
         fig, self.plot_ax = plt.subplots()
-        self.fig_canvas = FigureCanvasTkAgg(fig, master=plot_frame)
-        self.fig_canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
+        self.fig_canvas = FigureCanvasTkAgg(fig, master=self)
+        self.fig_canvas.get_tk_widget().grid(row=1, column=0, columnspan=2, sticky='nsew')
 
         # Left Column Frame
         left_column_frame = ttk.Frame(self, padding="3")
@@ -560,9 +558,8 @@ class FluorometerUI(tk.Tk):
         left_column_frame.columnconfigure(1, weight=1)
         mode_labelframe.columnconfigure(0, weight=1)
         right_column_frame.columnconfigure(1, weight=1)
-        plot_frame.columnconfigure(0, weight=1)
         control_frame.columnconfigure(3, weight=1)
-        self.rowconfigure(2, weight=1)
+        self.rowconfigure(1, weight=1)
         
     def refresh_com_ports(self):
         # Refresh the COM port list (default to DEMO port if no COM ports are available)
