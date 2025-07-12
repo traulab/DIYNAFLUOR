@@ -298,6 +298,10 @@ class FluorometerUI(tk.Tk):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        # Set the window icon, on win32 this must be done before calling create_widgets
+        self.configure_window_icon()
+        
         self.title("DIYNAFLUOR Fluorometer")
         # Add explicit quit handler, since on some systems the window close button doesn't work
         self.protocol("WM_DELETE_WINDOW", self._quit)
@@ -311,16 +315,10 @@ class FluorometerUI(tk.Tk):
         # the user cancels the change
         self.previous_mode = self.mode.get()
         self.previous_selected_com_port = self.selected_com_port.get()
-        
-        # Set the icon for the application window
-        # (we do this after creating the widgets to avoid Matplotlib replacing the icon on macOS)
-        try:
-            icon_path = Path(sys._MEIPASS) / "icon.png"
-        except Exception:
-            icon_path = Path(__file__).parent / "icon.png"
-        icon_image = Image.open(icon_path)
-        icon_photo = ImageTk.PhotoImage(icon_image)
-        self.iconphoto(True, icon_photo)
+
+        # Reset the window icon, we need to do this on macOS as matplotlib overwrites the
+        # icon we set earlier
+        self.configure_window_icon()
 
     def _quit(self):
         self.quit()
@@ -455,6 +453,16 @@ class FluorometerUI(tk.Tk):
             return True
         else:
             return False
+
+    def configure_window_icon(self):
+        """Set the icon for the main application window."""
+        try:
+            icon_path = Path(sys._MEIPASS) / "icon.png"
+        except Exception:
+            icon_path = Path(__file__).parent / "icon.png"
+        icon_image = Image.open(icon_path)
+        icon_photo = ImageTk.PhotoImage(icon_image)
+        self.iconphoto(True, icon_photo)
 
     def create_widgets(self):
         """Create and lay out widgets for the main application window."""
