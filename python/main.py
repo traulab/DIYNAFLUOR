@@ -2,6 +2,7 @@ from fluorometer import Fluorometer
 import serial.tools.list_ports
 import tkinter as tk
 from tkinter import ttk
+from PIL import Image, ImageTk
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
@@ -309,6 +310,16 @@ class FluorometerUI(tk.Tk):
         # the user cancels the change
         self.previous_mode = self.mode.get()
         self.previous_selected_com_port = self.selected_com_port.get()
+        
+        # Set the icon for the application window
+        # (we do this after creating the widgets to avoid Matplotlib replacing the icon on macOS)
+        try:
+            icon_path = Path(sys._MEIPASS) / "icon.png"
+        except Exception:
+            icon_path = Path(__file__).parent / "icon.png"
+        image = Image.open(icon_path)
+        photo = ImageTk.PhotoImage(image)
+        self.iconphoto(True, photo)
 
     def _quit(self):
         self.quit()
