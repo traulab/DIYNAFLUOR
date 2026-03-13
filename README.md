@@ -52,7 +52,7 @@ The DIYNAFLUOR is controlled by a low-cost Arduino Uno (or clone). Use the Ardui
 
 ![image](https://github.com/user-attachments/assets/33b1f898-5cd8-4806-b8fb-6f8ca5f6e7c8)
 
-We have also developed a Windows 10/11 executable Graphical User Interface (GUI) that provides visualisation and recording of fluorescent measurements (as .csv files), as well as features like a 2-Point Calibration methodology for commercial DNA quantitation kits, and a Fluorometer mode that allows measurements at variable output LED excitation intensities. (see [DIYNAFLUOR.exe](https://github.com/traulab/DIYNAFLUOR/releases/tag/release))
+We have also developed a Windows 10/11 and MacOS Apple Silicon Graphical User Interface (GUI) that provides visualisation and recording of fluorescent measurements (as .csv files), as well as features like a 2-Point Calibration methodology for commercial DNA quantitation kits, and a Fluorometer mode that allows measurements at variable output LED excitation intensities. (see our [release page](https://github.com/traulab/DIYNAFLUOR/releases/tag/release)) for the current versions of the DIYNAFLUOR software.
 
 ![image](https://github.com/user-attachments/assets/f50fe4b1-fbd7-4535-8bd0-369d63a5338b)
 
