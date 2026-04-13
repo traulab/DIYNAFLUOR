@@ -20,7 +20,7 @@ Focusing on QCing Nanopore sequencing libraries, The DIYNAFLUOR aims to help rem
 1.	Buy the parts listed in the Bill of Materials (BOM). ([DIYNAFLUOR BOM.xlsx](DIYNAFLUOR%20BOM.xlsx))
 2.	3D Print the provided .stl files in a matte black PLA. ([3D Printing Files.zip](3D%20Printing%20Files.zip))
 3.	Assemble the DIYNAFLUOR. ([Build Instructions.pdf](Build%20Instructions.pdf))
-4.	Flash the Arduino Uno and Install the GUI Software. ([DIYNAFLUOR.ino](https://github.com/traulab/DIYNAFLUOR/blob/main/arduino/DIYNAFLUOR.ino)), ([DIYNAFLUOR.exe](https://github.com/traulab/DIYNAFLUOR/releases/tag/release))
+4.	Flash the Arduino Uno and Install the GUI Software. ([DIYNAFLUOR.ino](https://github.com/traulab/DIYNAFLUOR/blob/main/arduino/DIYNAFLUOR.ino)), ([DIYNAFLUOR.exe](https://github.com/traulab/DIYNAFLUOR/releases/tag/v1.1.0))
 5.	Verify the performance of the device.
 
 ### Detailed Guide:
